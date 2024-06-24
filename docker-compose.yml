@@ -1,0 +1,109 @@
+version: '3'
+services:
+  # Shard Replicat Set 1
+  mongors1n1:
+    container_name: mongors1n1
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data1_1:/data/db'
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+
+  mongors1n2:
+    container_name: mongors1n2
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data1_2:/data/db'
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+
+  mongors1n3:
+    container_name: mongors1n3
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data1_3:/data/db'
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+
+  # Shard Replicat Set 2
+  mongors2n1:
+    container_name: mongors2n1
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data2_1:/data/db'
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+
+  mongors2n2:
+    container_name: mongors2n2
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data2_2:/data/db'
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+
+  mongors2n3:
+    container_name: mongors2n3
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/data2_3:/data/db'
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+
+  
+  # Shard Configuration Replicat Set 1    
+  mongocfg1:
+    container_name: mongocfg1
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/config1:/data/db'
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+
+  mongocfg2:
+    container_name: mongocfg2
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/config2:/data/db'
+      - './movies.json:/'
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+
+  mongocfg3:
+    container_name: mongocfg3
+    image: mongo
+    environment:
+      - TERM=xterm
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './mongo_cluster/config3:/data/db'
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+
+  # Shard Route
+  mongos1:
+    container_name: mongos1
+    image: mongo
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    ports:
+      - 27017:27017
+    command: >-
+      mongos --configdb
+      mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017
+      
